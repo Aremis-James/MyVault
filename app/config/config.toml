@@ -1,0 +1,13 @@
+[db]
+user = 'Hp'
+port = 5432
+database = 'passwordvault'
+host = 'localhost'
+
+[logs]
+folder = 'logs'
+logs_db.filename = 'database_logs.txt'
+logs_db.level = ''
+logs_ui.filename = 'nicegui_logs.txt'
+logs_api.filename = 'fastapi_logs.txt'
+
