@@ -1,10 +1,17 @@
 from typing import Union
 from fastapi import FastAPI, HTTPException, logger
-from database.operations import UserOperations
 from database.connection import session
 
 
 app = FastAPI()
+
+#Dependency
+def get_session():
+    db = session()
+    try:
+        yield db
+    finally:
+        db.close()
 
 
 @app.get("/")

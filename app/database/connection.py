@@ -10,6 +10,7 @@ import os
 def session():
     load_dotenv()
     absolut_path = f'{os.getenv("ABS_PATH")}'
+    
     with open(absolut_path,'rb') as file:
         toml_load = tomllib.load(file)['db']
         user = toml_load['user']
@@ -23,4 +24,3 @@ def session():
     return Session()
 
 
-session()

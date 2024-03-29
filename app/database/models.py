@@ -8,21 +8,25 @@ class User(Base):
     __tablename__ = 'users'
     
     id = Column(Integer, Sequence('user_id_seq'), primary_key=True)
-    email = Column(String, unique=True, nullable=False)
+
+    #Base
+    email = Column(String, unique=True, nullable=False, index=True)
     password = Column(String, nullable=False)
 
-    passwords = relationship("Password", back_populates="user", cascade="all, delete, delete-orphan")
+    items = relationship("Item", back_populates="user", cascade="all, delete, delete-orphan")
 
 
 
-class Password(Base):
+class Item(Base):
     __tablename__ = 'passwords'
 
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    
+    #Base
     username = Column(String, nullable=False)
     password = Column(String, nullable=False)
     website = Column(String)
     notes = Column(Text)
 
-    user = relationship('User', back_populates='passwords')
+    user = relationship('User', back_populates='items')

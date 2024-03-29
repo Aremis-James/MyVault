@@ -2,6 +2,7 @@ from typing import Tuple
 import ast
 import string
 from secrets import SystemRandom
+from style import kantumruy
 
 from nicegui import ui
 import time
@@ -17,17 +18,7 @@ class NiceUi:
 
     def setup_theme(self):
         ui.query('body').style('background-color: #155e75')
-        ui.add_head_html("""
-        <link href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Kantumruy+Pro:ital,wght@1,100..700&display=swap" rel="stylesheet">
-        <style>
-        .kantumruy-pro {
-        font-family: "Kantumruy Pro", sans-serif;
-        font-optical-sizing: auto;
-        font-weight: 700;
-        font-style: italic;
-    }
-        </style>                
-                         """)
+        ui.add_head_html(f'{kantumruy}')
     
 
             
