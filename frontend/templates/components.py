@@ -23,7 +23,12 @@ class LoginButton(ui.button):
     def __init__(self,*args, **kwargs):
         super().__init__(*args, **kwargs)
         pass
-    
+
+def menu() -> None:
+    ui.link.default_classes(replace='text-white')
+    ui.link('Home', '/')
+    ui.link('Vault', '/youtube-title-generator/')
+    ui.link('Password Generator', '/youtube-script/')
 
 
 if __name__ in {"__main__", "__mp_main__"}:
