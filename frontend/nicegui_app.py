@@ -7,7 +7,7 @@ from templates.theme import frame
 ui.add_head_html(f'{fonts}')
 
 def login(email: str, password:str):
-    url = 'http://127.0.0.1:8000/user/login'
+    url = 'http://127.0.0.1:8000/users/login'
     data = {'email': email, 'password': password}
     response = requests.post(url, json=data)
 
@@ -19,10 +19,10 @@ def login(email: str, password:str):
 
 with frame('Login'):
     with ui.card().classes('mt-60'):
-        ui.input.default_classes('lobster')
-        email = ui.input('email', on_change=None).classes('lobster')
+        ui.input.default_classes('')
+        email = ui.input('email', on_change=None)
         password = ui.input('password', password=True, password_toggle_button=True, on_change=None)
-    # ui.button('Login', on_click=lambda: login(email.value, password.value))
+    ui.button('Login', on_click=lambda: login(email.value, password.value))
 
 
-ui.run(window_size=(600, 800), dark=True, frameless=True)
+ui.run(window_size=(400, 800), dark=True,frameless=True)

@@ -1,12 +1,13 @@
 from pydantic import BaseModel, EmailStr, HttpUrl
-
+from enum import Enum
 
 class ItemBase(BaseModel):
     username: str | EmailStr
     password: str 
-    website: HttpUrl
+    website: str | HttpUrl
     notes: str
 
+    
 class ItemCreate(ItemBase):
     pass
 
@@ -23,6 +24,7 @@ class UserBase(BaseModel):
 
 class UserCreate(UserBase):
     password: str
+    
 
 class User(UserBase):
     id:int
@@ -30,3 +32,9 @@ class User(UserBase):
         
     class Config:
             from_attributes = True
+
+
+class Tags(Enum):
+     item = 'items'
+     users = 'users'
+     

@@ -1,5 +1,4 @@
-from passlib.hash import pbkdf2_sha256
-import models, schemas
+import models, schemas, dependencies
 from sqlalchemy.orm import Session
 
 
@@ -13,25 +12,29 @@ def get_user_by_email(db:Session, email:schemas.UserBase):
 
 
 def create_user(db:Session, user: schemas.UserCreate):
-    exist = get_user_by_email(db, user.email)
-
-    if exist:
-        print(f"User with email {user.email} already exists.")
-
-        return 
-            
-    db_user = models.User(email=user.email, password=pbkdf2_sha256.hash(user.password))
+    db_user = models.User(email=user.email, password=dependencies.hash_password(user.password))
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
     return db_user
 
+def get_items(db:Session, skip: int = 0, limit: int = 100):
+    return db.query(models.Item).offset(skip).limit(limit).all()
 
+def get_user_items(db:Session, user_id:int, skip: int = 0, limit: int = 100):
+    return db.query(models.Item).filter(models.Item.user_id==user_id).offset(skip).limit(limit).all()
+
+
+def create_item(db:Session, item: schemas.ItemCreate, user_id: int):
+    db_item = models.Item(**item.model_dump(), user_id=user_id)
+    db.add(db_item)
+    db.commit()
+    db.refresh(db_item)
+    return db_item
 
 if __name__ =='__main__':
     pass
-    # from dependencies import session
-    # create_user(db=session(), user=schemas.UserCreate(email='admin@gmail.com', password='1234'))
+
 
 
 
