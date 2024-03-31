@@ -1,4 +1,5 @@
 from pydantic import BaseModel, EmailStr, HttpUrl
+from typing import Optional
 from enum import Enum
 
 class ItemBase(BaseModel):
@@ -7,9 +8,18 @@ class ItemBase(BaseModel):
     website: str | HttpUrl
     notes: str
 
+
+class ItemUpdate(BaseModel):
+    username: Optional[str | EmailStr] = None
+    password: Optional[str] = None 
+    website: Optional[str | HttpUrl] =None
+    notes: Optional[str] = None
+    
     
 class ItemCreate(ItemBase):
     pass
+
+
 
 class Item(ItemBase):
     id:int
@@ -20,7 +30,7 @@ class Item(ItemBase):
 
 
 class UserBase(BaseModel):
-    email: EmailStr
+    username: EmailStr
 
 class UserCreate(UserBase):
     password: str
@@ -34,7 +44,10 @@ class User(UserBase):
             from_attributes = True
 
 
-class Tags(Enum):
-     item = 'items'
-     users = 'users'
-     
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+
+class TokenData(BaseModel):
+    username: str | None = None

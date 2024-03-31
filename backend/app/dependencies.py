@@ -1,7 +1,10 @@
+from datetime import timedelta, datetime , timezone
 import tomllib, models, keyring, os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from passlib.context import CryptContext
+from jose import jwt
+from fastapi.security import OAuth2PasswordBearer
 from dotenv import load_dotenv
 
 ########## DataBase Dependencies ##########
@@ -29,7 +32,7 @@ def get_session():
         db.close()
 
 
-######## Password Validation ########        
+######## Password Auth ########        
 
 pwd_context = CryptContext(schemes=[os.getenv('ENCRYPT')], deprecated='auto')
 
@@ -38,3 +41,19 @@ def hash_password(password: str) -> str:
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     return pwd_context.verify(plain_password, hashed_password)
+
+
+#################### Token Auth #######################
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl='token')
+
+def create_access_token(data:dict, expires_delta: timedelta| None= None):
+    to_encode = data.copy()
+    if expires_delta:
+        expire = datetime.now(timezone.utc) + expires_delta
+    else:
+        expire = datetime.now(timezone.utc) + timedelta(minutes=15)
+    to_encode.update({'exp': expire})
+    encode_jwt = jwt.encode(to_encode, os.getenv('SECRET_KEY'), algorithm='HS256')
+    return encode_jwt
+
+

@@ -7,15 +7,20 @@ from templates.theme import frame
 ui.add_head_html(f'{fonts}')
 
 def login(email: str, password:str):
-    url = 'http://127.0.0.1:8000/users/login'
+    url = 'http://127.0.0.1:8000/v1/users/login'
     data = {'email': email, 'password': password}
     response = requests.post(url, json=data)
 
-    if response.status_code == 200:
-        ui.notify('Login successful', type='positive')
-    else:
-        detail = response.json().get('details', 'Login failed')
-        ui.notify(detail, type='negative')
+    match response.status_code:
+
+        case 202:
+            ui.notify('Login successful', type='positive')
+
+        case 422:
+            detail = response.json().get('detail', 'Login failed')
+            ui.notify(detail, type='negative')
+        case _:
+            ui.notify('bananas', type='warning')
 
 with frame('Login'):
     with ui.card().classes('mt-60'):
@@ -25,4 +30,4 @@ with frame('Login'):
     ui.button('Login', on_click=lambda: login(email.value, password.value))
 
 
-ui.run(window_size=(400, 800), dark=True,frameless=True)
+ui.run(window_size=(500, 800), dark=True,frameless=True)
