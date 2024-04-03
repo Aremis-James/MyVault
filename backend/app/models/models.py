@@ -15,7 +15,7 @@ class User(Base):
 
     items = relationship("Item", back_populates="user", cascade="all, delete, delete-orphan")
 
-
+    scopes = Column(String, default="", nullable=False)
 
 class Item(Base):
     __tablename__ = 'passwords'

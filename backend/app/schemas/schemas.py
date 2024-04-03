@@ -20,7 +20,6 @@ class ItemCreate(ItemBase):
     pass
 
 
-
 class Item(ItemBase):
     id:int
     user_id: int
@@ -32,8 +31,13 @@ class Item(ItemBase):
 class UserBase(BaseModel):
     username: EmailStr
 
+
 class UserCreate(UserBase):
     password: str
+
+
+class UserUpdate(UserBase):
+    password: Optional[str] = None
     
 
 class User(UserBase):
@@ -51,3 +55,9 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     username: str | None = None
+    scopes: list[str]= []
+
+class Tags(Enum):
+    auth= 'authentication'
+    user = 'user'
+    items = 'items'

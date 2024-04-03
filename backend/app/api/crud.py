@@ -1,4 +1,6 @@
-import models, schemas, dependencies
+from app.models import models
+from app.schemas import schemas
+from app.api import dependencies
 from sqlalchemy.orm import Session
 
 ###################### User Crud ##############################
@@ -17,6 +19,18 @@ def post_user(db:Session, user: schemas.UserCreate):
     db.commit()
     db.refresh(db_user)
     return db_user
+
+def update_user(db:Session, user: models.User, user_update:dict):
+    for key, value in user_update.items():
+        if hasattr(user,key):
+            setattr(user, key,value)
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+    return user
+
+
+
 
 
 ###################### Item Crud ##############################
