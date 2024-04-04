@@ -1,5 +1,5 @@
-from app.models import models
-from app.schemas import schemas
+from backend.app.api import models
+from backend.app.api import schemas
 from app.api import dependencies
 from sqlalchemy.orm import Session
 

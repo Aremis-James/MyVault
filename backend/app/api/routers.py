@@ -1,6 +1,6 @@
 import os
 from app.api import crud, dependencies
-from app.schemas import schemas
+from backend.app.api import schemas
 from typing import Annotated
 from datetime import timedelta
 from sqlalchemy.orm import Session
