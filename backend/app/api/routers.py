@@ -1,67 +1,20 @@
-import os
-from app.api import crud, dependencies
-from backend.app.api import schemas
+from ..api import schemas, dependencies, crud
+from ..core import security
 from typing import Annotated
 from datetime import timedelta
 from sqlalchemy.orm import Session
-from jose import JWTError, jwt
 from fastapi import APIRouter, Depends, Path, status, HTTPException, Security
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm, SecurityScopes
+from fastapi.security import  OAuth2PasswordRequestForm
 
 router =APIRouter()
 
 tags = schemas.Tags
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl='/v1/login/token',
-                                     scopes={
-                                            'user:read': 'Allows reading user data',
-                                            'user:write': 'Allows writing user data',
-                                            'user:delete': 'Allows deleting user data',
-                                            'admin:read': 'Allows reading all data',
-                                            'admin:write': 'Allows writing all data',
-                                            'admin:delete': 'Allows deleting all data',
-                                            }
-)
-
-def get_current_user(security_scopes : SecurityScopes,
-                     token: Annotated[str, Depends(oauth2_scheme)], 
-                     db = Depends(dependencies.get_session)):
-    if security_scopes:
-        authenticate = f'Bearer scope="{security_scopes.scope_str}"'
-    else:
-        authenticate = 'Bearer'
-    
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail='Could not validate credentials',
-        headers={'WWW-Authenticate': 'Bearer'},    
-        )
-    try:
-        payload =jwt.decode(token, os.getenv('SECRET_KEY'), algorithms=['HS256'])
-        username:str = payload.get('sub')
-        if username is None:
-            raise credentials_exception
-        token_scopes = payload.get('scopes', [])
-        token_data = schemas.TokenData(scopes=token_scopes, username=username)
-    except JWTError:
-        raise credentials_exception
-    user = crud.get_user_by_email(db=db, email=token_data.username)
-    if user is None:
-        raise credentials_exception
-    for scope in security_scopes.scopes:
-        if scope not in token_data.scopes:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail='Not Enough permissions',
-                headers={'WWW-Authenticate': authenticate}
-            )
-    return user
-
 
 @router.post('/v1/login/token',
           summary='Authenticate a user', 
           status_code=status.HTTP_202_ACCEPTED, 
-          tags=[tags.auth])
+          tags=[tags.user])
 def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
           
           db:Session = Depends(dependencies.get_session),
@@ -83,18 +36,18 @@ def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     """
 
     user = crud.get_user_by_email(db,email=form_data.username)
-    if not user or not dependencies.verify_password(form_data.password, user.password):
+    if not user or not security.verify_password(form_data.password, user.password):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, 
                             detail="Incorrect username or password",
                             headers={"WWW-Authenticate": "Bearer"})
     access_token_expires = timedelta(minutes=30)
-    access_token = dependencies.create_access_token(data={'sub': user.email, 'scopes': user.scopes}, expires_delta=access_token_expires)
+    access_token = security.create_access_token(data={'sub': user.email, 'scopes': user.scopes.strip('{}').split(',')}, expires_delta=access_token_expires)
     
     return schemas.Token(access_token=access_token, token_type='bearer')
 
 
-@router.post('/v1/signup/', response_model= schemas.User, summary='Create a new user', status_code=status.HTTP_201_CREATED, tags=[tags.user])
-def signup( user: schemas.UserCreate, 
+@router.post('/v1/register/', response_model= schemas.User, summary='Create a new user', status_code=status.HTTP_201_CREATED, tags=[tags.user])
+def register( user: schemas.UserCreate, 
         db:Session = Depends(dependencies.get_session)):
     """
     Registers a new user with an email and password.
@@ -120,7 +73,7 @@ def signup( user: schemas.UserCreate,
 
 
 @router.get('/v1/user', tags=[tags.user], summary='Retrieves the currently authenticated user')
-def read_current_user(current_user: Annotated[schemas.User, Security(get_current_user, scopes=['user:read', 'user:write'])]):
+def read_current_user(current_user: Annotated[schemas.User, Security(dependencies.get_current_user, scopes=['user:read'])]):
     """
     Retrieves the currently authenticated user's information.
 
@@ -137,7 +90,7 @@ def read_current_user(current_user: Annotated[schemas.User, Security(get_current
 
 @router.post('/v1/user/items', response_model= schemas.Item, summary='Add a new item', status_code=status.HTTP_201_CREATED, tags=[tags.items])
 def add_user_item(item: schemas.ItemCreate, 
-                current_user :schemas.User = Depends(get_current_user),
+                current_user :Annotated[schemas.User, Security(dependencies.get_current_user, scopes=['user:write'])],
                 db:Session = Depends(dependencies.get_session)):
     """
     Adds a new item to the collection of the currently authenticated user.
@@ -155,7 +108,7 @@ def add_user_item(item: schemas.ItemCreate,
 
 @router.get('/v1/user/items', response_model=list[schemas.Item], summary='Retrieve a list of items', tags=[tags.items])
 def get_user_items(skip:int=0, limit:int = 10,
-                current_user: schemas.User = Depends(get_current_user),
+                current_user: schemas.User = Depends(dependencies.get_current_user),
                 db:Session = Depends(dependencies.get_session)):
     """
     Retrieves a paginated list of items owned by the currently authenticated user.
@@ -179,7 +132,7 @@ def get_user_items(skip:int=0, limit:int = 10,
 @router.patch('/v1/user/items/{item_id}', response_model= schemas.Item, tags=[tags.items], summary='Update an item', status_code=status.HTTP_202_ACCEPTED)
 def update_item(item_id: Annotated[int, Path(gt=0)], 
                 item_update: schemas.ItemUpdate,
-                current_user: schemas.User = Depends(get_current_user),
+                current_user: schemas.User = Depends(dependencies.get_current_user),
                 db:Session = Depends(dependencies.get_session)):
     """
     Updates the details of an item owned by the currently authenticated user.

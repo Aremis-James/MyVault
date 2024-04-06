@@ -1,7 +1,9 @@
-from backend.app.api import models
-from backend.app.api import schemas
-from app.api import dependencies
+from ..api import models
+from ..api import schemas
+from ..api import dependencies
+from ..core import security
 from sqlalchemy.orm import Session
+
 
 ###################### User Crud ##############################
 def get_user(db: Session, user_id: int):
@@ -13,8 +15,9 @@ def get_user_by_email(db:Session, email:schemas.UserBase):
     return db.query(models.User).filter(models.User.email == email).first()
 
 
+
 def post_user(db:Session, user: schemas.UserCreate):
-    db_user = models.User(email=user.email, password=dependencies.hash_password(user.password))
+    db_user = models.User(email=user.email, password=security.hash_password(user.password), scopes=','.join(user.scopes))
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
@@ -60,9 +63,7 @@ def update_item(db:Session, item: models.Item, item_update: dict):
     return item
 
 if __name__ =='__main__':
-    pass
-
-
+ pass
 
 
 

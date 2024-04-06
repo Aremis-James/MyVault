@@ -31,4 +31,4 @@ with frame('Login'):
     ui.button('Login', on_click=lambda: login(email.value, password.value))
 
 
-ui.run(window_size=(500, 800), dark=True,frameless=True)
+ui.run(dark=True)

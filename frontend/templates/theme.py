@@ -15,17 +15,15 @@ def frame(navtitle: str):
     with ui.column().classes('absolute-center items-center h-screen no-wrap p-9 w-full'):
         yield
         
-    with ui.header().classes('row items-center justify-center'):
+    with ui.left_drawer(top_corner=True).classes('row items-center'):
         ui.label('MyVault').classes('lobster-two-bold text-xl')
-        
-            
-
-    with ui.footer().classes('row items-center justify-center'):
         ui.icon.default_classes('text-2xl pr-2')
+    
         ui.icon('eva-github')
         ui.icon('eva-linkedin-outline')
         ui.icon('eva-twitter')
+        yield
         
 
-    with ui.page_sticky(position='bottom-right', x_offset=20, y_offset=20):
-        pass
+        with ui.page_sticky(position='bottom-right', x_offset=20, y_offset=20):
+            pass

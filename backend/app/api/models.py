@@ -12,10 +12,11 @@ class User(Base):
     #Base
     email = Column(String, unique=True, nullable=False, index=True)
     password = Column(String, nullable=False)
+    scopes = Column(String, default="", nullable=False)
 
     items = relationship("Item", back_populates="user", cascade="all, delete, delete-orphan")
 
-    scopes = Column(String, default="", nullable=False)
+   
 
 class Item(Base):
     __tablename__ = 'passwords'

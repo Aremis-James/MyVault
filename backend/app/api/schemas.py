@@ -1,3 +1,4 @@
+import email
 from pydantic import BaseModel, EmailStr, HttpUrl
 from typing import Optional
 from enum import Enum
@@ -29,11 +30,13 @@ class Item(ItemBase):
 
 
 class UserBase(BaseModel):
-    username: EmailStr
+    email: EmailStr
 
 
 class UserCreate(UserBase):
     password: str
+    scopes: list[str]
+
 
 
 class UserUpdate(UserBase):
