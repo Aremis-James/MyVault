@@ -7,8 +7,8 @@ from sqlalchemy.orm import declarative_base
 from alembic import context
 import os
 
-from backend.app.core.config import DATABASE_URL
-
+from dotenv import load_dotenv
+load_dotenv()
 
 Base = declarative_base()
 # this is the Alembic Config object, which provides
